@@ -26,6 +26,8 @@ class App extends Component {
     // axios.patch(apiEndpoint + "/" + post.id, { title: post.title });
     // axios.put // updates all properties.
     // await axios.put(apiEndpoint + "/" + post.id, post);
+
+    //pessimistic update - make api call first then update the UI
     await axios.put(`${apiEndpoint}/${post.id}`, post);
     const posts = [...this.state.posts];
     const index = posts.indexOf(post);
@@ -34,9 +36,29 @@ class App extends Component {
   };
 
   handleDelete = async (post) => {
-    await axios.delete(`${apiEndpoint}/${post.id}`);
+    // optimistic update - update the UI before making api call
+    const originalPosts = this.state.posts;
     const posts = this.state.posts.filter((p) => p.id !== post.id);
     this.setState({ posts });
+
+    try {
+      await axios.delete(`${apiEndpoint}/${post.id}`);
+      // throw new Error("");
+    } catch (ex) {
+      // ex.request;
+      // ex.response;
+      if (ex.response && ex.response.status === 404) {
+        //expects (404: not found, 400: bad request) - HTTP protocal client errors, displays a specific error message
+        alert("this post has already been deleted");
+      } else {
+        //unexpected errors - errors that should not happen under normal circumstances (network down, server is down, database is down, bug in application)
+        // - must log these erros
+        // - displat a generic and friendly error message
+        alert("something failed while deleteing a post");
+      }
+
+      this.setState({ posts: originalPosts });
+    }
   };
 
   render() {
