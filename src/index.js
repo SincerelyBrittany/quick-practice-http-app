@@ -2,14 +2,11 @@ import React from "react";
 import ReactDOM from "react-dom";
 import App from "./App";
 import registerServiceWorker from "./registerServiceWorker";
-import Raven from "raven-js";
+import logger from "./services/logService.js";
 import "./index.css";
 import "bootstrap/dist/css/bootstrap.css";
 
-// Raven.config("@sentry.io", {
-//   release: "0-0-0",
-//   environment: "development-rest",
-// }).install;
+logger.init();
 
 ReactDOM.render(<App />, document.getElementById("root"));
 registerServiceWorker();
